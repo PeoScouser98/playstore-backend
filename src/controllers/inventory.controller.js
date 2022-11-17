@@ -1,0 +1,9 @@
+import Inventory from "../models/inventory.model";
+
+// TODO:  LIST INVENTORY
+
+// TODO: READ SINGLE INVENTORY
+
+// TODO: CREATE A NEW INVENTORY
+
+// TODO: UPDATE AN ITEM IN INVENTORY
