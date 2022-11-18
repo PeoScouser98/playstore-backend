@@ -1,7 +1,6 @@
-import Product from "../models/product.model";
-import Category from "../models/category.model";
 import createError from "http-errors";
-import assert from "assert";
+import Product from "../models/product.model";
+import Inventory from "../models/inventory.model";
 
 export const list = async (req, res) => {
 	try {

@@ -30,6 +30,10 @@ const productSchema = mongoose.Schema(
 			type: String,
 			require: true,
 		},
+		stock: {
+			type: Number,
+			require: true,
+		},
 		alternateImages: [String],
 		specs: {
 			type: [{ k: String, v: String | Number }],
