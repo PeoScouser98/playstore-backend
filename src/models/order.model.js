@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import autoPopulatePlugin from "mongoose-autopopulate";
 
 const orderSchema = mongoose.Schema(
 	{
@@ -15,23 +16,35 @@ const orderSchema = mongoose.Schema(
 			address: String, // địa chỉ giao hàng
 			deliveryNotes: String, // ghi chú giao hàng
 			shippingCost: Number, // phí vận chuyển
-			status: {
-				type: Number,
-				enum: [0, 1, 2, 3, 4],
-				default: 0,
-			},
 		},
-
 		transaction: {
 			type: mongoose.Types.ObjectId,
 		},
-		purchased: {
-			type: mongoose.Types.ObjectId,
-			ref: "Carts",
-		},
-		amount: { type: Number, require: true },
+		purchasedItems: [
+			{
+				product: {
+					type: mongoose.Types.ObjectId,
+					ref: "Products",
+					autopopulate: { select: "title -category" },
+				},
+				unitPrice: {
+					type: Number,
+					min: 10000,
+				},
+				quantity: {
+					type: Number,
+					min: 1,
+				},
+			},
+		],
 		totalAmount: { type: Number, require: true },
+		orderStatus: {
+			type: mongoose.Types.ObjectId,
+			ref: "OrderStatus",
+			autopopulate: true,
+		},
 	},
+
 	{
 		timestamp: true,
 		strictPopulate: false,
@@ -40,11 +53,19 @@ const orderSchema = mongoose.Schema(
 	},
 );
 
-orderSchema.virtual("totalAmount").get(function () {
-	return this.amount + this.shipping.shippingCost;
-});
-orderSchema.virtual("isRegisteredUser").get(function () {
+// * check có phải khách hàng của hệ thống hay khách vãng lai
+orderSchema.virtual("isRegisteredCustomer").get(function () {
 	return this.customerId !== undefined;
 });
+
+orderSchema.pre("save", function (next) {
+	const tempAmount = this.purchasedItems.reduce((prev, curr) => {
+		return prev + curr.unitPrice * curr.quantity;
+	}, 0);
+	this.totalAmount = tempAmount + this.shipping.shippingCost;
+	next();
+});
+
+orderSchema.plugin(autoPopulatePlugin);
 
 export default mongoose.model("Orders", orderSchema);
