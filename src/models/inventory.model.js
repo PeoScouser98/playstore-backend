@@ -1,26 +1,40 @@
 import mongoose from "mongoose";
-import autoPopulate from "mongoose-autopopulate";
+import autoPopulatePlugin from "mongoose-autopopulate";
+
 const inventorySchema = mongoose.Schema(
 	{
-		product: { type: mongoose.Types.ObjectId, require: true },
+		product: {
+			type: mongoose.Types.ObjectId,
+			require: true,
+			autopopulate: true,
+			ref: "Products",
+		},
 		stock: {
 			type: Number,
 			require: true,
 			min: 0,
 		}, // số lượng sản phẩm hiện còn trong kho
-		reservations: {
-			type: Array, // customerName:String - quantity:Number
-			default: [],
-		},
-		autopopulate: true,
+		imports: [
+			{
+				supplier: {
+					name: String,
+					phone: String,
+					email: String,
+					address: String,
+				},
+				unitPrice: Number,
+				quantity: Number,
+			},
+		],
 	},
 	{
 		timestamp: true,
 		strictPopulate: false,
-		toJSON: { virtuals: true },
-		toObject: { virtuals: true },
 	},
 );
+inventorySchema.methods.checkPosibleQty = function (quantity) {
+	return this.stock > quantity;
+};
 
-inventorySchema.plugin(autoPopulate);
+inventorySchema.plugin(autoPopulatePlugin);
 export default mongoose.model("Inventory", inventorySchema);
