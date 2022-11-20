@@ -1,11 +1,11 @@
 import Inventory from "../models/inventory.model";
 import createError from "http-errors";
-// TODO:  LIST INVENTORY
+
 export const list = async (req, res) => {
 	try {
-		const inventoryItems = await Inventory.find().exec();
+		const inventoryItems = await Inventory.find().populate("orders").exec();
 		if (!inventoryItems) createError.NotFound("Kho hàng không tồn tại!");
-		// handle logic ...
+		// inventoryItems.forEach((item) => console.log(item));
 		return res.status(200).json(inventoryItems);
 	} catch (error) {
 		return res.json({
@@ -15,7 +15,7 @@ export const list = async (req, res) => {
 		// handle errors
 	}
 };
-// TODO: READ SINGLE INVENTORY
+
 export const read = async (req, res) => {
 	try {
 		const inventoryItem = await Inventory.findOne({ _id: req.params.id }).exec();
@@ -28,7 +28,7 @@ export const read = async (req, res) => {
 		// handle errors
 	}
 };
-// TODO: CREATE A NEW INVENTORY
+
 export const create = async (req, res) => {
 	try {
 		if (!req.body) throw createError.BadRequest("Thông tin sản phẩm trong kho không hợp lệ");
@@ -42,31 +42,24 @@ export const create = async (req, res) => {
 	}
 };
 
-// TODO: UPDATE AN ITEM IN INVENTORY
-export const update = async (req, res) => {
+export const addOnStock = async (req, res) => {
 	try {
-		const action = req.query.action;
-		switch (action) {
-			case "checkout":
-				const updatedInventoryReservations = await Inventory.findOneAndUpdate(
-					{ _id: req.params.id },
-					{ $push: { reservations: req.body }, $set: { stock: stock - req.body.quantity } },
-					{ new: true, upsert: true },
-				);
-				if (updatedInventoryReservations) createError.NotFound("Không tìm thấy sản phẩm trong kho hàng");
+		const updatedInventoryStock = await Inventory.findOneAndUpdate({ _id: req.params.id }, { $inc: { stock: req.body.stock } }, { new: true, upsert: true });
+		return res.status(201).json(updatedInventoryStock);
+	} catch (error) {
+		return res.json({
+			status: error.status,
+			message: error.message,
+		});
+	}
+};
 
-				return res.status(201).json(updatedInventoryReservations);
-			case "import":
-				const updatedInventoryStock = await Inventory.findOneAndUpdate(
-					{ _id: req.params.id },
-					{ $set: { stock: req.body.stock } },
-					{ new: true, upsert: true },
-				);
-				if (!updatedInventoryStock) createError.NotFound("Không tìm thấy sản phẩm trong kho hàng");
-				return res.status(201).json(updatedInventoryStock);
-			default:
-				break;
-		}
+export const remove = async (req, res) => {
+	try {
+		const removedItem = await Inventory.findOneAndDelete({ _id: req.params.id }).exec();
+		if (!removedItem) throw createError.NotFound("Không tìm được sản phẩm để xóa!");
+		const afterRemove = await Inventory.find().exec();
+		return res.status(201).json(afterRemove);
 	} catch (error) {
 		return res.json({
 			status: error.status,
