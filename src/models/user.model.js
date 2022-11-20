@@ -27,8 +27,8 @@ const userSchema = mongoose.Schema({
 });
 // * methods là 1 phương thức được định nghĩa cho 1 documents (1 bản ghi)
 userSchema.methods = {
-	async authenticate(password, encryptedPassword) {
-		return bcrypt.compare(password, encryptedPassword);
+	async authenticate(password) {
+		return bcrypt.compare(password, this.password);
 	},
 	async encryptPassword(password) {
 		const salt = await bcrypt.genSalt(+process.env.SALT_LENGTH);

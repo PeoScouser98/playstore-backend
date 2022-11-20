@@ -3,10 +3,13 @@ import "dotenv/config";
 import createError from "http-errors";
 // * Using models & services
 import User from "../models/user.model";
-import transporter from "../services/mailer.service";
+import transporter from "../configs/nodemailer.config";
+import { checkIfValidEmail } from "../helpers/validate";
 
 export const register = async (req, res) => {
 	try {
+		if (!checkIfValidEmail(req.body.email)) throw createError.BadRequest("Email không hợp lệ!");
+
 		const existedUser = await User.findOne({ email: req.body.email }).exec();
 		console.log(existedUser);
 		if (existedUser) throw createError.BadRequest("Tài khoản đã tồn tại!");
@@ -45,8 +48,10 @@ export const activateAccount = async (req, res, next) => {
 	}
 };
 
-export const login = async (req, res, next) => {
+export const login = async (req, res) => {
 	try {
+		if (!checkIfValidEmail(req.body.email)) throw createError.BadRequest("Email không hợp lệ!");
+
 		const user = await User.findOne({ email: req.body.email }).exec();
 		if (!user) {
 			const error = createError.NotFound("Tài khoản không tồn tại");
@@ -54,7 +59,7 @@ export const login = async (req, res, next) => {
 			throw error;
 		}
 
-		let isValidPassword = user.authenticate(req.body.password, user.password);
+		let isValidPassword = user.authenticate(req.body.password);
 		if (!isValidPassword) throw createError.NotFound("Mật khẩu không chính xác");
 
 		// * tạo access token
