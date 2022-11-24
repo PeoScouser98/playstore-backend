@@ -7,7 +7,6 @@ import User from "../models/user.model";
 export const checkAuth = async (req, res, next) => {
 	try {
 		let token = req.headers.authorization;
-
 		if (!token) throw createError.Unauthorized("Access token không hợp lệ!");
 		token = standardizeString(token).split(" ")[1];
 
@@ -17,12 +16,13 @@ export const checkAuth = async (req, res, next) => {
 		const user = await User.findOne({ _id: payload.auth }).select("_id role");
 		if (!user) throw createError.NotFound("Người dùng không tồn tại trong hệ thống!");
 
+		console.log(user);
 		req.auth = user._id;
 		req.role = user.role;
 		next();
 	} catch (error) {
 		return res.json({
-			status: error.status,
+			status: 401,
 			message: error.message,
 		});
 	}

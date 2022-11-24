@@ -16,14 +16,12 @@ const userSchema = mongoose.Schema({
 		require: true,
 		maxLength: 50,
 	},
+	avatar: { type: String },
 	address: {
 		type: String,
 	},
 	phone: { type: String },
 	role: { type: Number, enum: [0, 1, 2], default: 2 },
-	refreshToken: {
-		type: String,
-	},
 });
 // * methods là 1 phương thức được định nghĩa cho 1 documents (1 bản ghi)
 userSchema.methods = {

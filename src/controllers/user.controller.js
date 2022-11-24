@@ -4,7 +4,8 @@ import createError from "http-errors";
 export const get = async (req, res) => {
 	try {
 		if (!req.auth) throw createError.Unauthorized("Bạn không đủ quyền truy cập vào thông tin người dùng!");
-		const user = User.findOne({ _id: req.auth }).select("username email address phone");
+		const user = await User.findOne({ _id: req.auth }).select("-password -__v -_id");
+		console.log(user);
 		return res.status(200).json(user);
 	} catch (error) {
 		return res.json({

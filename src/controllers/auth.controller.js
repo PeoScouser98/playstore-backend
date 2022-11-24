@@ -63,7 +63,7 @@ export const login = async (req, res) => {
 		if (!isValidPassword) throw createError.NotFound("Mật khẩu không chính xác");
 
 		// * tạo access token
-		const accessToken = jwt.sign({ auth: user._id }, process.env.TOKEN_SECRET, { expiresIn: "1h" });
+		const accessToken = jwt.sign({ auth: user._id }, process.env.TOKEN_SECRET, { expiresIn: "30s" });
 
 		return res.status(200).json({
 			auth: user._id,
@@ -79,9 +79,10 @@ export const login = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
 	try {
-		const refreshToken = jwt.sign({ auth: req.body.auth }, process.env.TOKEN_SECRET);
+		const refreshToken = jwt.sign({ auth: req.body.auth }, process.env.TOKEN_SECRET, { expiresIn: "1h" });
+		console.log("refresh token:>>", refreshToken);
 		if (!refreshToken) throw createError.NotImplemented("Lỗi tạo refresh token");
-		return refreshToken;
+		return res.status(201).json(refreshToken);
 	} catch (error) {
 		return res.json({
 			status: error.status,
