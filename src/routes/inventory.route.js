@@ -8,5 +8,4 @@ router.get("/inventory/:id", _Inventory.read);
 router.post("/inventory", checkAuth, checkAdmin, _Inventory.create);
 router.patch("/inventory/:id/add-on-stock", checkAuth, checkAdmin, _Inventory.addOnStock);
 router.delete("/inventory/:id", checkAuth, checkAdmin, _Inventory.remove);
-
 export default router;

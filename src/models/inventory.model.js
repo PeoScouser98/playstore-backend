@@ -13,22 +13,19 @@ const inventorySchema = mongoose.Schema(
 			type: Number,
 			require: true,
 			min: 0,
-		}, // số lượng sản phẩm hiện còn trong kho
-		imports: [
-			{
-				supplier: {
-					name: String,
-					phone: String,
-					email: String,
-					address: String,
-				},
-				unitPrice: Number,
-				quantity: Number,
+		},
+		supplier: {
+			partner: String,
+			unitPrice: Number,
+			quantity: Number,
+			importDate: {
+				type: String,
+				default: new Date().toLocaleDateString(),
 			},
-		],
+		},
 	},
 	{
-		timestamp: true,
+		timeStamp: true,
 		strictPopulate: false,
 	},
 );

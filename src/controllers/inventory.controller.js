@@ -44,7 +44,11 @@ export const create = async (req, res) => {
 
 export const addOnStock = async (req, res) => {
 	try {
-		const updatedInventoryStock = await Inventory.findOneAndUpdate({ _id: req.params.id }, { $inc: { stock: req.body.stock } }, { new: true, upsert: true });
+		const updatedInventoryStock = await Inventory.findOneAndUpdate(
+			{ _id: req.params.id },
+			{ $inc: { stock: req.body.quantity }, supplier: req.body },
+			{ new: true, upsert: true },
+		);
 		return res.status(201).json(updatedInventoryStock);
 	} catch (error) {
 		return res.json({
@@ -56,11 +60,13 @@ export const addOnStock = async (req, res) => {
 
 export const remove = async (req, res) => {
 	try {
+		console.log(req.params.id);
 		const removedItem = await Inventory.findOneAndDelete({ _id: req.params.id }).exec();
 		if (!removedItem) throw createError.NotFound("Không tìm được sản phẩm để xóa!");
-		const afterRemove = await Inventory.find().exec();
-		return res.status(201).json(afterRemove);
+		console.log(removedItem);
+		return res.json(removedItem);
 	} catch (error) {
+		console.log(error.message);
 		return res.json({
 			status: error.status,
 			message: error.message,
