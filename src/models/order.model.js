@@ -27,6 +27,7 @@ const orderSchema = mongoose.Schema(
 					ref: "Products",
 					autopopulate: { select: "title -category" },
 				},
+				// đơn giá nhập vào
 				unitPrice: {
 					type: Number,
 					min: 10000,
